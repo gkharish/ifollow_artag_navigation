@@ -56,8 +56,8 @@ void ArtagNavCommander::sendGoal(MoveBaseClient& ac, move_base_msgs::MoveBaseGoa
 
 bool ArtagNavCommander::analyzeImage(){
 
-  std::string full_path_where_to_get_image="/home/devcyclair/noetic_ws/src/apriltag_ros/apriltag_ros/ar_tags/ar_webcam.png";
-  std::string full_path_where_to_save_image="/home/devcyclair/noetic_ws/src/apriltag_ros/apriltag_ros/ar_tags/ar_webcam_drawn.png";
+  std::string full_path_where_to_get_image="/home/devcyclair/noetic_ws/src/ifollow_artag_navigation/apriltag_ros/apriltag_ros/ar_tags/ar_webcam.png";
+  std::string full_path_where_to_save_image="/home/devcyclair/noetic_ws/src/ifollow_artag_navigation/apriltag_ros/apriltag_ros/ar_tags/ar_webcam_drawn.png";
   sensor_msgs::CameraInfo camera_info;
   camera_info.distortion_model = "plumb_bob";
 
