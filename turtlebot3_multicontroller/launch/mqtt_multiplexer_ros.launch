@@ -1,0 +1,7 @@
+<launch>
+
+  <node pkg="turtlebot3_multicontroller" type="mqtt_listener.py" name="turtlebot3_mqt_listener" output="screen" />
+  <node pkg="turtlebot3_multicontroller" type="multiplexer.py" name="turtlebot3_multiplexer" output="screen" />
+
+
+</launch>

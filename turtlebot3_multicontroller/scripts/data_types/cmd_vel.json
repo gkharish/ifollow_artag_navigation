@@ -1,0 +1,12 @@
+{
+    linear: {
+        x:<float>,
+        y:<float>,
+        z:<float>
+    },
+    angular: {
+        x:<float>,
+        y:<float>,
+        z:<float>
+    }
+}

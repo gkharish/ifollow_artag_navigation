@@ -1,0 +1,23 @@
+{ 
+    header: { 
+        seq: <int>, 
+        stamp:  {
+            secs: <int>,
+            nsecs: <int>
+        },
+        frame_id: <string>
+    },
+    pose: {
+        position: {
+            x: <float>,
+            y: <float>,
+            z: <float>
+        },
+        orientation: {
+            x: <float>,
+            y: <float>,
+            z: <float>,
+            w: <float>
+        }
+    }
+}
