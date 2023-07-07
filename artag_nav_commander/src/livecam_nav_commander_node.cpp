@@ -31,7 +31,7 @@ LiveCamNavCommander::LiveCamNavCommander(ros::NodeHandle& nh, ros::NodeHandle& p
   pnh.param<int>("queue_size", queue_size, 1);
   camera_image_subscriber_ =
       it_->subscribeCamera("image_rect", queue_size,
-                          &ContinuousDetector::imageCallback, this,
+                          &LiveCamNavCommander::imageCallback, this,
                           image_transport::TransportHints(transport_hint));
 
   pnh.param<bool>("draw_tag_detections_image_", draw_tag_detections_image_, true);
@@ -53,6 +53,7 @@ bool LiveCamNavCommander::triggerCallBack(std_srvs::Trigger::Request& request, s
   return true;
 }
 
+LiveCamNavCommander::~LiveCamNavCommander(){}
 
 void LiveCamNavCommander::waitForNavstack(MoveBaseClient& mv_ac) {
     
@@ -156,59 +157,52 @@ void LiveCamNavCommander::sendGoal(MoveBaseClient& ac, move_base_msgs::MoveBaseG
 // }
 
 void LiveCamNavCommander::getRosParams(ros::NodeHandle& pnh){
-  // std::string full_path_where_to_get_image="/home/devcyclair/noetic_ws/src/ifollow_artag_navigation/apriltag_ros/apriltag_ros/ar_tags/ar_webcam.png";
-  // std::string full_path_where_to_save_image="/home/devcyclair/noetic_ws/src/ifollow_artag_navigation/apriltag_ros/apriltag_ros/ar_tags/ar_webcam_drawn.png";
-  sensor_msgs::CameraInfo camera_info;
-  camera_info.distortion_model = "plumb_bob";
 
-  double fx = 643.651478;
+  camera_info_.distortion_model = "plumb_bob";
+
+  double fx = 643.651478;  // TODO: Get it from param server
   double fy = 644.265346;
   double cx = 304.4428;
   double cy = 226.340608;
 
 
-  camera_info.K[0] = fx;
-  camera_info.K[2] = cx;
-  camera_info.K[4] = fy;
-  camera_info.K[5] = cy;
-  camera_info.K[8] = 1.0;
-  camera_info.P[0] = fx;
-  camera_info.P[2] = cx;
-  camera_info.P[5] = fy;
-  camera_info.P[6] = cy;
-  camera_info.P[10] = 1.0;
+  camera_info_.K[0] = fx;
+  camera_info_.K[2] = cx;
+  camera_info_.K[4] = fy;
+  camera_info_.K[5] = cy;
+  camera_info_.K[8] = 1.0;
+  camera_info_.P[0] = fx;
+  camera_info_.P[2] = cx;
+  camera_info_.P[5] = fy;
+  camera_info_.P[6] = cy;
+  camera_info_.P[10] = 1.0;
 
-  camera_info_ = camera_info;
-
-  // ROS_INFO("[ Summoned to analyze image ]");
-  // ROS_INFO("Image load path: %s",
-  //          full_path_where_to_get_image.c_str());
-  // ROS_INFO("Image save path: %s",
-  //          full_path_where_to_save_image.c_str()); 
+ 
   std::cout << "Ros Param updated!" << std::endl; 
   
 }
 
 bool LiveCamNavCommander::analyzeImage2(sensor_msgs::ImageConstPtr  ros_img){
- std::scoped_lock<std::mutex> lock(detection_mutex_);
+ //std::scoped_lock<std::mutex> lock(detection_mutex_);
  try
   {
-    cv_image_ = cv_bridge::toCvCopy(image_rect, image_rect->encoding);
+    cv_image_ = cv_bridge::toCvCopy(ros_img, ros_img->encoding);
   }
   catch (cv_bridge::Exception& e)
   {
     ROS_ERROR("cv_bridge exception: %s", e.what());
-    return;
+    return false;
   }
 
   // apriltag detection
   tag_detections_publisher_.publish(
-      tag_detector_->detectTags(cv_image_,camera_info_));
+      tag_detector_.detectTags(cv_image_, sensor_msgs::CameraInfoConstPtr(
+          new sensor_msgs::CameraInfo(camera_info_)) ));
 
   // If chosen true, draw border lines on the detected tag and publish the payload values
   if (draw_tag_detections_image_)
   {
-    tag_detector_->drawDetections(cv_image_);
+    tag_detector_.drawDetections(cv_image_);
     tag_detections_image_publisher_.publish(cv_image_->toImageMsg());
   }
 
@@ -238,7 +232,7 @@ int main(int argc, char **argv)
   ros::NodeHandle pnh("~");
 
   artag_nav_commander::LiveCamNavCommander ar_commander(nh, pnh);
-  ar_commander.analyzeImage();
+  // ar_commander.analyzeImage();
   
   ros::spin();
 }

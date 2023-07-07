@@ -60,8 +60,13 @@ include_directories(include
 # add_library(${PROJECT_NAME}
 #   src/${PROJECT_NAME}/artag_nav_commander.cpp
 # )
+
 add_executable(artag_nav_commander_node src/artag_nav_commander_node.cpp)
 target_link_libraries(artag_nav_commander_node  ${catkin_LIBRARIES})
+
+add_executable(livecam_nav_commander_node src/livecam_nav_commander_node.cpp)
+target_link_libraries(livecam_nav_commander_node  ${catkin_LIBRARIES})
+
 
 #############
 ## Install ##
