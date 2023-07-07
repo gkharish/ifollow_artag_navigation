@@ -94,3 +94,7 @@ Process:
 
     You can see that the rover will move to a destination position in the gazebo simulation.
 
+
+Task3: Take picture from a live camera, detect april tag if present and then send nav goal to the robot.
+
+    $ roslaunch usb_cam usb_cam-test.launch video_device:=/dev/video0
