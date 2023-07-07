@@ -216,7 +216,7 @@ void LiveCamNavCommander::imageCallback (
 {
 
   image_cur_ = image_rect;
-  std::cout << "Img Callback!" << std::endl; 
+  //std::cout << "Img Callback!" << std::endl; 
 
 }
 

@@ -12,6 +12,7 @@
 #include <actionlib/client/simple_action_client.h>
 #include <memory>
 #include <mutex>
+#include <image_transport/image_transport.h>
 
 typedef actionlib::SimpleActionClient<move_base_msgs::MoveBaseAction> MoveBaseClient;
 
