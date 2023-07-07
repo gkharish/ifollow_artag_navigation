@@ -16,7 +16,7 @@ LiveCamNavCommander::LiveCamNavCommander(ros::NodeHandle& nh, ros::NodeHandle& p
 
   capture_image_analysis_service_ =
     nh.advertiseService("livecam_tag_detection",
-                        &LiveCamNavCommander::triggerCallBack, this);
+                        &LiveCamNavCommander::triggerImageCapture, this);
 
   tag_detections_publisher_ =
     nh.advertise<apriltag_ros::AprilTagDetectionArray>("tag_detections", 1);
@@ -44,7 +44,7 @@ LiveCamNavCommander::LiveCamNavCommander(ros::NodeHandle& nh, ros::NodeHandle& p
 
 }
 
-bool LiveCamNavCommander::triggerCallBack(std_srvs::Trigger::Request& request, std_srvs::Trigger::Response& response) { 
+bool LiveCamNavCommander::triggerImageCapture(std_srvs::Trigger::Request& request, std_srvs::Trigger::Response& response) { 
   //testFunc();
   analyzeImage2(image_cur_);
   response.success = true;
@@ -195,9 +195,33 @@ bool LiveCamNavCommander::analyzeImage2(sensor_msgs::ImageConstPtr  ros_img){
   }
 
   // apriltag detection
-  tag_detections_publisher_.publish(
-      tag_detector_.detectTags(cv_image_, sensor_msgs::CameraInfoConstPtr(
-          new sensor_msgs::CameraInfo(camera_info_)) ));
+  tag_detections_ =  tag_detector_.detectTags( cv_image_, sensor_msgs::CameraInfoConstPtr(
+          new sensor_msgs::CameraInfo(camera_info_)) );
+  tag_detections_publisher_.publish(tag_detections_);
+  std::cout << "Img tag_detections_: " <<tag_detections_.detections.size()  << std::endl; 
+  
+  if (tag_detections_.detections.size()) {
+      ROS_INFO("April Tag detected. Decoding and sending Goal... ");
+      // Send goal to the navstack
+      actionlib::SimpleActionClient<move_base_msgs::MoveBaseAction>move_ac("move_base", true);
+      // Wait for the action server to come up so that we can begin processing goals.
+      while(!move_ac.waitForServer(ros::Duration(0.50))){
+        ROS_INFO("Waiting for the move_base action server ... ");
+      }
+
+      move_base_msgs::MoveBaseGoal goal;
+      goal.target_pose.header.frame_id = "map";
+      goal.target_pose.header.stamp = ros::Time::now();
+
+      // Convert  pose in camera frame to the base_link
+      goal.target_pose.pose.position.x = tag_detections_.detections[0].pose.pose.pose.position.z;
+      goal.target_pose.pose.position.y = -tag_detections_.detections[0].pose.pose.pose.position.x;
+      goal.target_pose.pose.position.z = 0.0;
+      goal.target_pose.pose.orientation.w = 1.0;
+
+      sendGoal(move_ac, goal);
+  }
+
 
   // If chosen true, draw border lines on the detected tag and publish the payload values
   if (draw_tag_detections_image_)

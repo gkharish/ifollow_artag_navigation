@@ -32,7 +32,7 @@ class LiveCamNavCommander
      LiveCamNavCommander(ros::NodeHandle& nh, ros::NodeHandle& pnh);
      ~LiveCamNavCommander();
 
-    bool triggerCallBack(std_srvs::Trigger::Request& request, std_srvs::Trigger::Response& response);
+    bool triggerImageCapture(std_srvs::Trigger::Request& request, std_srvs::Trigger::Response& response);
     void testFunc();
     
     //bool analyzeImage();
