@@ -19,6 +19,7 @@ ArtagNavCommander::ArtagNavCommander(ros::NodeHandle& nh, ros::NodeHandle& pnh):
     nh.advertise<apriltag_ros::AprilTagDetectionArray>("tag_detections", 1);
   ROS_INFO_STREAM("Ready to do tag detection on single images");
 
+  getRosParams(pnh);
   //MoveBaseClient ac_local("fdf", true);
   //move_ac_ = ac_local;
   //waitForNavstack(mv);
@@ -54,43 +55,57 @@ void ArtagNavCommander::sendGoal(MoveBaseClient& ac, move_base_msgs::MoveBaseGoa
          
 }
 
+void ArtagNavCommander::getRosParams(ros::NodeHandle& pnh) {
+  ros::param::param<double>("fx", cam_intrinsics_.fx, 643.651478);
+  ros::param::param<double>("fy", cam_intrinsics_.fy, 644.265346);
+  ros::param::param<double>("cx", cam_intrinsics_.cx, 304.4428);
+  ros::param::param<double>("cy", cam_intrinsics_.cy, 226.340608);
+  ros::param::param<std::string>("distortion_model", cam_intrinsics_.distortion_model, "plumb_bob");
+
+  ros::param::param<std::string>("src_image_path", src_img_, "/home/devcyclair/noetic_ws/src/ifollow_artag_navigation/apriltag_ros/apriltag_ros/ar_tags/ar_webcam.png");
+  ros::param::param<std::string>("saved_image_path", saved_img_, "/home/devcyclair/noetic_ws/src/ifollow_artag_navigation/apriltag_ros/apriltag_ros/ar_tags/ar_webcam_drawn.png");
+
+}
+
 bool ArtagNavCommander::analyzeImage(){
 
-  std::string full_path_where_to_get_image="/home/devcyclair/noetic_ws/src/ifollow_artag_navigation/apriltag_ros/apriltag_ros/ar_tags/ar_webcam.png";
-  std::string full_path_where_to_save_image="/home/devcyclair/noetic_ws/src/ifollow_artag_navigation/apriltag_ros/apriltag_ros/ar_tags/ar_webcam_drawn.png";
+  //std::string full_path_where_to_get_image="/home/devcyclair/noetic_ws/src/ifollow_artag_navigation/apriltag_ros/apriltag_ros/ar_tags/ar_webcam.png";
+  //std::string full_path_where_to_save_image="/home/devcyclair/noetic_ws/src/ifollow_artag_navigation/apriltag_ros/apriltag_ros/ar_tags/ar_webcam_drawn.png";
   sensor_msgs::CameraInfo camera_info;
-  camera_info.distortion_model = "plumb_bob";
+  camera_info.distortion_model = cam_intrinsics_.distortion_model;
 
-  double fx = 643.651478;
-  double fy = 644.265346;
-  double cx = 304.4428;
-  double cy = 226.340608;
+  // double fx = 643.651478;
+  // double fy = 644.265346;
+  // double cx = 304.4428;
+  // double cy = 226.340608;
 
 
-  camera_info.K[0] = fx;
-  camera_info.K[2] = cx;
-  camera_info.K[4] = fy;
-  camera_info.K[5] = cy;
+  camera_info.K[0] = cam_intrinsics_.fx;
+  camera_info.K[2] = cam_intrinsics_.cx;
+  camera_info.K[4] = cam_intrinsics_.fy;
+  camera_info.K[5] = cam_intrinsics_.cy;
   camera_info.K[8] = 1.0;
-  camera_info.P[0] = fx;
-  camera_info.P[2] = cx;
-  camera_info.P[5] = fy;
-  camera_info.P[6] = cy;
+  camera_info.P[0] = cam_intrinsics_.fx;
+  camera_info.P[2] = cam_intrinsics_.cx;
+  camera_info.P[5] = cam_intrinsics_.fy;
+  camera_info.P[6] = cam_intrinsics_.cy;
   camera_info.P[10] = 1.0;
 
-  ROS_INFO("[ Summoned to analyze image ]");
-  ROS_INFO("Image load path: %s",
-           full_path_where_to_get_image.c_str());
-  ROS_INFO("Image save path: %s",
-           full_path_where_to_save_image.c_str());
+  // getRosParams();
 
+  ROS_INFO("Image load path: %s",
+           src_img_.c_str());
+  ROS_INFO("Image save path: %s",
+           saved_img_.c_str());
+
+  ROS_INFO("Analyzing image ... ");
   // Read the image
-  cv::Mat image = cv::imread(full_path_where_to_get_image,
+  cv::Mat image = cv::imread(src_img_,
                              cv::IMREAD_COLOR);
   if (image.data == NULL) {
     // Cannot read image
     ROS_ERROR_STREAM("Could not read image " <<
-                     full_path_where_to_get_image.c_str());
+                     src_img_.c_str());
     return false;
   }
 
@@ -107,12 +122,21 @@ bool ArtagNavCommander::analyzeImage(){
   // geometry_msgs/PoseWithCovarianceStamped)
   tag_detections_publisher_.publish(tag_detections_);
 
+  // Save tag detections image
+  tag_detector_.drawDetections(loaded_image);
+  cv::imwrite(saved_img_, loaded_image->image);
+  
   // Send goal to the navstack
   actionlib::SimpleActionClient<move_base_msgs::MoveBaseAction>move_ac("move_base", true);
+
   // Wait for the action server to come up so that we can begin processing goals.
-  while(!move_ac.waitForServer(ros::Duration(0.50))){
-    ROS_INFO("Waiting for the move_base action server to come up");
-  }
+  // while(!move_ac.waitForServer(ros::Duration(0.50))){
+  //   ROS_INFO("Waiting for the move_base action server to come up");
+  // }
+
+  waitForNavstack(move_ac);
+
+
   move_base_msgs::MoveBaseGoal goal;
   goal.target_pose.header.frame_id = "map";
   goal.target_pose.header.stamp = ros::Time::now();
@@ -120,13 +144,12 @@ bool ArtagNavCommander::analyzeImage(){
   goal.target_pose.pose.position.x = tag_detections_.detections[0].pose.pose.pose.position.z;
   goal.target_pose.pose.position.y = -tag_detections_.detections[0].pose.pose.pose.position.x;
   goal.target_pose.pose.position.z = 0.0;
+
   goal.target_pose.pose.orientation.w = 1.0;
 
   sendGoal(move_ac, goal);
 
-  // Save tag detections image
-  tag_detector_.drawDetections(loaded_image);
-  cv::imwrite(full_path_where_to_save_image, loaded_image->image);
+
 
   ROS_INFO("Done!\n");
 

@@ -11,8 +11,8 @@
 
   <node pkg="artag_nav_commander" type="artag_nav_commander_node" name="$(arg node_namespace)" clear_params="true" output="screen" launch-prefix="$(arg launch_prefix)" >
 
-    <param name="image_load_path" type="str" value="$(arg image_load_path)" />
-    <param name="image_save_path" type="str" value="$(arg image_save_path)" />
+    <param name="src_image_path" type="str" value="$(arg image_load_path)" />
+    <param name="saved_image_path" type="str" value="$(arg image_save_path)" />
 
     <!-- Camera intrinsic parameters -->
     <param name="fx" type="double" value="643.651478" />

@@ -15,6 +15,16 @@ typedef actionlib::SimpleActionClient<move_base_msgs::MoveBaseAction> MoveBaseCl
 
 namespace artag_nav_commander
 {
+
+struct camera_intrisics {
+        std::string distortion_model = "plumb_bob"; 
+        double fx = 643.651478;
+        double fy = 644.265346;
+        double cx = 304.4428;
+        double cy = 226.340608;
+
+};
+
 class ArtagNavCommander
 {
     public:
@@ -26,6 +36,7 @@ class ArtagNavCommander
     bool analyzeImage();
     void waitForNavstack(MoveBaseClient& ac);
     void sendGoal(MoveBaseClient& ac, move_base_msgs::MoveBaseGoal goal);
+    void getRosParams(ros::NodeHandle& pnh);
 
     private:
      apriltag_ros::TagDetector tag_detector_;
@@ -33,6 +44,9 @@ class ArtagNavCommander
      ros::ServiceServer single_image_analysis_service_;
      ros::Publisher tag_detections_publisher_;
      sensor_msgs::CameraInfo camera_info_;
+     camera_intrisics cam_intrinsics_;
+     std::string src_img_;
+     std::string saved_img_;
 
      //MoveBaseClient move_ac_;
 };

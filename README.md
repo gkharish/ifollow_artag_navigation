@@ -13,7 +13,7 @@ Install MQTT server on the dev computer. Mosquito MQTT server has been chosen fo
 
 How to launch:
 
-In terminal 1: Launch the turtle bot. Don't forgt to export the env variable for the turtle bot model. 
+In terminal 1: Launch the turtle bot. Don't forget to export the env variable for the turtle bot model. 
 
     $ export TURTLEBOT3_MODEL=burger
     $ roslaunch turtlebot3_gazebo turtlebot3_empty_world.launch
