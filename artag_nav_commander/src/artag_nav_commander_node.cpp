@@ -62,9 +62,16 @@ void ArtagNavCommander::getRosParams(ros::NodeHandle& pnh) {
   ros::param::param<double>("cy", cam_intrinsics_.cy, 226.340608);
   ros::param::param<std::string>("distortion_model", cam_intrinsics_.distortion_model, "plumb_bob");
 
-  ros::param::param<std::string>("src_image_path", src_img_, "/home/devcyclair/noetic_ws/src/ifollow_artag_navigation/apriltag_ros/apriltag_ros/ar_tags/ar_webcam.png");
-  ros::param::param<std::string>("saved_image_path", saved_img_, "/home/devcyclair/noetic_ws/src/ifollow_artag_navigation/apriltag_ros/apriltag_ros/ar_tags/ar_webcam_drawn.png");
+  ros::param::param<std::string>("src_image_path", src_img_, "/home/devcyclair/noetic_ws/src/ifollow_artag_navigation/artag_nav_commander/ar_tags/ar_tag_3.JPG");
+  ros::param::param<std::string>("saved_image_path", saved_img_, "/home/devcyclair/noetic_ws/src/ifollow_artag_navigation/artag_nav_commander/ar_tags/ar_webcam_r_drawn3.JPG");
 
+  pnh.getParam("src_image_path", src_img_);
+  pnh.getParam("saved_image_path", saved_img_);
+
+  pnh.getParam("fx", cam_intrinsics_.fx);
+  pnh.getParam("fy", cam_intrinsics_.fy);
+  pnh.getParam("cx", cam_intrinsics_.cx);
+  pnh.getParam("cy", cam_intrinsics_.cy);
 }
 
 bool ArtagNavCommander::analyzeImage(){
@@ -118,6 +125,11 @@ bool ArtagNavCommander::analyzeImage(){
       tag_detector_.detectTags(loaded_image,sensor_msgs::CameraInfoConstPtr(
           new sensor_msgs::CameraInfo(camera_info)));
 
+  
+  if(!tag_detections_.detections.size()) {
+    ROS_INFO("Tags not detected ... ");
+
+  }
   // Publish detected tags (AprilTagDetectionArray, basically an array of
   // geometry_msgs/PoseWithCovarianceStamped)
   tag_detections_publisher_.publish(tag_detections_);

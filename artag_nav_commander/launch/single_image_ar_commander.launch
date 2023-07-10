@@ -2,8 +2,8 @@
 
   <arg name="launch_prefix" default="" /> <!--set to value="gdbserver localhost:10000" for remote debugging-->
   <arg name="node_namespace" default="artag_nav_commander" />
-  <arg name="image_load_path" default="$(find artag_nav_commander)/ar_tags/ar_webcam.png"/> <!--  load image for analysis -->
-  <arg name="image_save_path" default="$(find artag_nav_commander)/ar_tags/ar_tag_1_ros.jpg"/>
+  <arg name="image_load_path" default="$(find artag_nav_commander)/ar_tags/ar_tag_3.JPG"/> <!--  load image for analysis -->
+  <arg name="image_save_path" default="$(find artag_nav_commander)/ar_tags/ar_tag_3_ros.jpg"/>
 
   <!-- Set parameters -->
   <rosparam command="load" file="$(find artag_nav_commander)/config/settings.yaml" ns="$(arg node_namespace)" />
