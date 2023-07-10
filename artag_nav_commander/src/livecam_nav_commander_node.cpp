@@ -76,16 +76,24 @@ void LiveCamNavCommander::sendGoal(MoveBaseClient& ac, move_base_msgs::MoveBaseG
          
 }
 
+
 void LiveCamNavCommander::getRosParams(ros::NodeHandle& pnh){
+  double fx, fy, cx, cy;
+  ros::param::param<double>("fx", fx, 643.651478);
+  ros::param::param<double>("fy", fy, 644.265346);
+  ros::param::param<double>("cx", cx, 304.4428);
+  ros::param::param<double>("cy", cy, 226.340608);
 
-  camera_info_.distortion_model = "plumb_bob";
+  pnh.getParam("fx", fx);
+  pnh.getParam("fy", fy);
+  pnh.getParam("cx", cx);
+  pnh.getParam("cy", cy);
 
-  double fx = 643.651478;  // TODO: Get it from param server
-  double fy = 644.265346;
-  double cx = 304.4428;
-  double cy = 226.340608;
-
-
+  std::string distortion_model;
+  ros::param::param<std::string>("distortion_model", distortion_model, "plumb_bob");
+  pnh.getParam("distortion_model", distortion_model);
+ 
+  camera_info_.distortion_model = distortion_model;
   camera_info_.K[0] = fx;
   camera_info_.K[2] = cx;
   camera_info_.K[4] = fy;
@@ -98,7 +106,7 @@ void LiveCamNavCommander::getRosParams(ros::NodeHandle& pnh){
   camera_info_.P[10] = 1.0;
 
  
-  std::cout << "Ros Param updated!" << std::endl; 
+  ROS_INFO("Ros Param updated!"); 
   
 }
 
