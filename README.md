@@ -144,4 +144,19 @@ Task3: Take picture from a live camera, detect april tag if present and then sen
     Launch rqt to see the colored bordered of the detected tag.
 
 
+### ISSUES #####
+1. I have't able to detect the ar_tag_2.JPG. But 1 and 3 were fine and were able to pass the cmd to nav stack.
+
+2. I haven't tested several times and in different conditions (different orientations, lighting conditions). I would also like to work on the accuracy of the pose given (by the ar detector) and reached by the bot. I kept it for futher analysis.
+
+3. I had some issues with parameter server, but it has been resolved and it works on my side. In case, the node crashes due to not finding the image file or setting file, please consider to edit the file path in Cpp directly, compile and test. Also be sure to check the video input param while using live web cam ar detect node. 
+
+4. 
+
+### Time allotement ###
+I spend in total 25-30 hours on this project.
+First 4-5 hrs on Understanding Mqtt, and packages of Mqtt with ros and then implementation might had taken 5-8 hrs.
+
+I spent again around 4 hours for getting info about Ar tags, april tags and researching about the existing libraries. And finally spend straight 10-12 hours for implementing the artag_nav_commander pkg.
+
 
