@@ -2,7 +2,7 @@
 
 There are two main tasks implemented in this package.
 
-Task 1: Controlling or commanding the turtlebot3 through a multimodal control channel. This section covers the Qestion 3 from Test_recrutement.
+Task 1: Controlling or commanding the turtlebot3 through a multimodal control channel.
 
 There are two modes of the control, one is coming from web "cmd_web" and local onboard or manual cmd "cmd_local".
 cmd_web must be coming from a remote MQTT client. 
@@ -57,7 +57,7 @@ Ros side implementation
 
   
 
-Task 2: Implement a navigation stack pipeline using apriltags. This section covers the Q4 and Q5(Bonus).
+Task 2: Implement a navigation stack pipeline using apriltags.
 
 pkg: artag_nav_commander
 
@@ -143,8 +143,6 @@ Task3: Take picture from a live camera, detect april tag if present and then sen
     or 
     Launch rqt to see the colored bordered of the detected tag.
 
-
-
-I spent again around 4 hours for getting info about Ar tags, april tags and researching about the existing libraries. And finally spend straight 10-12 hours for implementing the artag_nav_commander pkg.
+##########################################################################################################################
 
 
